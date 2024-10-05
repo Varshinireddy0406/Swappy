@@ -45,6 +45,7 @@ function Login() {
                 <input className="form-control" type="text" value={password}
                     onChange={(e) => {
                         setpassword(e.target.value)
+                        
                     }} />
                 <br></br>
                 <button className="btn btn-primary mr-3" onClick={handleApi}> LOGIN </button>
