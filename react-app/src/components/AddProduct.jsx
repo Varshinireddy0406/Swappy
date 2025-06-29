@@ -1,123 +1,102 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import categories from "./CategoriesList";
 import API_URL from "../constants";
+import './AddProduct.css'; // 👈 Import custom styles
 
 function AddProduct() {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
-    const [pname, setpname] = useState('');
-    const [pdesc, setpdesc] = useState('');
-    const [price, setprice] = useState('');
-    // const [ptime, setptime] = useState('');
-    const [category, setcategory] = useState('');
-    const [pimage, setpimage] = useState('');
-    const [pimage2, setpimage2] = useState('');
-    
+  const [pname, setpname] = useState('');
+  const [pdesc, setpdesc] = useState('');
+  const [price, setprice] = useState('');
+  const [category, setcategory] = useState('');
+  const [pimage, setpimage] = useState('');
+  const [pimage2, setpimage2] = useState('');
 
-
-    useEffect(() => {
-        if (!localStorage.getItem('token')) {
-            navigate('/login')
-        }
-    }, [])
-
-    const handleApi = () => {
-
-        navigator.geolocation.getCurrentPosition((position) => {
-            const formData = new FormData();
-            formData.append('plat', position.coords.latitude)
-            formData.append('plong', position.coords.longitude)
-            formData.append('pname', pname)
-            formData.append('pdesc', pdesc)
-            formData.append('price', price)
-            formData.append('category', category)
-            formData.append('pimage', pimage)
-            formData.append('pimage2', pimage2)
-            formData.append('userId', localStorage.getItem('userId'))
-
-            const url =  API_URL + '/add-product';
-            axios.post(url, formData)
-                .then((res) => {
-                    if (res.data.message) {
-                        alert(res.data.message); 
-                        navigate('/')
-                    }
-                })
-                .catch((err) => {
-                    alert('server err')
-                })
-        })
-
-
-
+  useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      navigate('/login');
     }
+  }, []);
 
-    return (
-        <div>
-            <Header />
-            <div className="p-3">
+  const handleApi = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const formData = new FormData();
+      formData.append('plat', position.coords.latitude);
+      formData.append('plong', position.coords.longitude);
+      formData.append('pname', pname);
+      formData.append('pdesc', pdesc);
+      formData.append('price', price);
+      formData.append('category', category);
+      formData.append('pimage', pimage);
+      formData.append('pimage2', pimage2);
+      formData.append('userId', localStorage.getItem('userId'));
 
-                <h2> ADD PRODUCT HERE : </h2>
-                <label> Product Name </label>
-                <input className="form-control" type="text" value={pname}
-                    onChange={(e) => { setpname(e.target.value) }} />
-                <label> Product Description </label>
-                <input className="form-control" type="text" value={pdesc}
-                    onChange={(e) => { setpdesc(e.target.value) }} />
-                <label> Product Price</label>
-                <input className="form-control" type="text" value={price}
-                    onChange={(e) => { setprice(e.target.value) }} />
-                    {/* <label> Product Usage </label>
-                      <input className="form-control" type="text" value={ptime}
-                    onChange={(e) => { setptime(e.target.value) }} /> */}
-                <label> Product Category </label>
-                <select className="form-control" value={category}
-                    onChange={(e) => { setcategory(e.target.value) }}>
-                
+      const url = API_URL + '/add-product';
+      axios.post(url, formData)
+        .then((res) => {
+          if (res.data.message) {
+            alert(res.data.message);
+            navigate('/');
+          }
+        })
+        .catch(() => {
+          alert('Server error');
+        });
+    });
+  };
 
-                          
-                <option> Quilts and covers </option>
-                <option> Dustbin </option>
-                <option> Foot-mats </option>
-                <option> Bathing products </option>
-                <option> Books </option>
-                <option> Electronics </option>
-                <option> Broomstick and Dustpan </option>
-                <option> Mattresses </option>
-                <option>Question papers</option>
-                   
+  return (
+    <div>
+      <Header />
 
+      <div className="add-product-wrapper">
+        <h2 className="add-product-title">Add Product</h2>
+        <div className="add-product-card">
 
-                    {
-                        categories && categories.length > 0 &&
-                        categories.map((item, index) => {
-                            return (
-                                <option key={'option' + index}> {item} </option>
-                            )
-                        })
-                    }
-                </select>
-                <label> Product Image </label>
-                <input className="form-control" type="file"
-                    onChange={(e) => {
-                        setpimage(e.target.files[0])
-                    }} />
+          <label>Product Name</label>
+          <input className="form-control" type="text" value={pname} onChange={(e) => setpname(e.target.value)} />
 
-                <label> Product Second Image </label>
-                <input className="form-control" type="file"
-                    onChange={(e) => {
-                        setpimage2(e.target.files[0])
-                    }} />
-                <button onClick={handleApi} className="btn btn-primary mt-3"> SUBMIT </button>
+          <label>Product Description</label>
+          <input className="form-control" type="text" value={pdesc} onChange={(e) => setpdesc(e.target.value)} />
 
-                
-            </div>
+          <label>Product Price</label>
+          <input className="form-control" type="text" value={price} onChange={(e) => setprice(e.target.value)} />
 
+          <label>Product Category</label>
+          <select className="form-control" value={category} onChange={(e) => setcategory(e.target.value)}>
+            <option disabled value="">-- Select Category --</option>
+            <option>Quilts and covers</option>
+            <option>Dustbin</option>
+            <option>Foot-mats</option>
+            <option>Bathing products</option>
+            <option>Books</option>
+            <option>Electronics</option>
+            <option>Broomstick and Dustpan</option>
+            <option>Mattresses</option>
+            <option>Question papers</option>
+            <option>Bed </option>
+            {
+              categories.map((item, index) => (
+                <option key={'cat-' + index}>{item}</option>
+              ))
+            }
+          </select>
+
+          <label>Product Image</label>
+          <input className="form-control" type="file" onChange={(e) => setpimage(e.target.files[0])} />
+
+          <label>Second Image (optional)</label>
+          <input className="form-control" type="file" onChange={(e) => setpimage2(e.target.files[0])} />
+
+          <button onClick={handleApi} className="btn btn-primary submit-btn mt-3">Submit</button>
         </div>
-    )
+      </div>
+    </div>
+  );
 }
 
 export default AddProduct;

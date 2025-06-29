@@ -2,52 +2,55 @@ import { useEffect, useState } from "react";
 import Header from "./Header";
 import axios from "axios";
 import API_URL from "../constants";
+import { FaUserCircle } from "react-icons/fa";
+import "./MyProfile.css";
 
 function MyProfile() {
+  const [user, setUser] = useState({});
 
-    const [user, setuser] = useState({})
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
 
-    useEffect(() => {
-        let url = API_URL + '/my-profile/' + localStorage.getItem('userId');
-        axios.get(url)
-            .then((res) => {
-                console.log(res.data)
-                if (res.data.user) {
-                    setuser(res.data.user);
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-    }, [])
+    axios
+      .post(`${API_URL}/get-user`, { id: userId })
+      .then((res) => {
+        console.log("✅ User response:", res.data);
+        if (res.data?.user) {
+          setUser(res.data.user);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Profile fetch error:", err);
+        alert("Server Error");
+      });
+  }, []);
 
-
-    return (
-        <div>
-            <Header />
-            <div className="m-3 p-3" >
-                <h3 className="text-center mt-2"> USER PROFILE </h3>
-                <table className="table table-bordered">
-                    <thead>
-                        <tr>
-                            <td> USERNAME </td>
-                            <td> EMAIL ID </td>
-                            <td> MOBILE NUMBER </td>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        <tr>
-                            <td>  {user.username} </td>
-                            <td>  {user.email} </td>
-                            <td>  {user.mobile} </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+  return (
+    <div>
+      <Header />
+      <div className="profile-wrapper">
+        <div className="profile-card">
+          <div className="profile-avatar">
+            <FaUserCircle size={70} />
+            <h3>User Profile</h3>
+          </div>
+          <div className="profile-row">
+            <label>Username</label>
+            <span>{user.username || "-"}</span>
+          </div>
+          <div className="profile-row">
+            <label>Email ID</label>
+            <span>{user.email || "-"}</span>
+          </div>
+          <div className="profile-row">
+            <label>Mobile Number</label>
+            <span>{user.mobile || "-"}</span>
+          </div>
         </div>
-    )
+      </div>
+    </div>
+  );
 }
-
 
 export default MyProfile;

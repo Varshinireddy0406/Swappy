@@ -1,0 +1,111 @@
+/* Container */
+.product-detail-container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Title at top */
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: left;
+  color: #333;
+}
+
+/* Layout */
+.product-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Row of images */
+.product-images-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.product-images-row img {
+  width: 300px;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Info Section */
+.product-info {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.product-info h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.product-info p {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+.text-success {
+  color: green;
+}
+
+.contact-box {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #eef6ff;
+  border-left: 4px solid #007bff;
+  border-radius: 8px;
+}
+
+.contact-box h4 {
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.contact-box p {
+  margin: 2px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+/* Button Style */
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 15px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .product-images-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .product-info {
+    width: 100%;
+  }
+}

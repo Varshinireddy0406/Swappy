@@ -3,73 +3,81 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Header from "./Header";
 import API_URL from "../constants";
+import './ProductDetail.css';
 
 function ProductDetail() {
+  const { productId } = useParams();
+  const [product, setProduct] = useState(null);
+  const [user, setUser] = useState(null);
+  const [showContact, setShowContact] = useState(false);
 
-    const [product, setproduct] = useState()
-    const [user, setuser] = useState()
-    // console.log(user, "userrrrr")
-    const p = useParams()
+  useEffect(() => {
+    const url = API_URL + '/get-product/' + productId;
+    axios.get(url)
+      .then((res) => {
+        if (res.data.product) {
+          setProduct(res.data.product);
+        }
+      })
+      .catch(() => alert('Server Error'));
+  }, [productId]);
 
-    useEffect(() => {
-        const url = API_URL + '/get-product/' + p.productId;
-        axios.get(url)
-            .then((res) => {
-                if (res.data.product) {
-                    setproduct(res.data.product)
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-    }, [])
+  const handleContact = (addedBy) => {
+    const url = API_URL + '/get-user/' + addedBy;
+    axios.get(url)
+      .then((res) => {
+        if (res.data.user) {
+          setUser(res.data.user);
+          setShowContact(true);
+        }
+      })
+      .catch(() => alert('Server Error'));
+  };
 
+  return (
+    <>
+      <Header />
+      <div className="product-detail-container">
+        <h2 className="title">PRODUCT DETAILS</h2>
 
-    const handleContact = (addedBy) => {
-        console.log('id', addedBy)
-        const url = API_URL + '/get-user/' + addedBy;
-        axios.get(url)
-            .then((res) => {
-                if (res.data.user) {
-                    setuser(res.data.user)
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-    }
+        {product && (
+          <div className="product-detail-content">
+            {/* Images in a row */}
+            <div className="product-images-row">
+              <img src={API_URL + '/' + product.pimage} alt="Main" />
+              {product.pimage2 && (
+                <img src={API_URL + '/' + product.pimage2} alt="Second" />
+              )}
+            </div>
 
-    return (<>
-        <Header />
-        <h3>PRODUCT DETAILS :</h3>
-        <div >
-            {product && <div className="d-flex justify-content-between flex-wrap">
-                <div>
-                    <img width="400px" height="200px" src={API_URL + '/' + product.pimage} alt="" />
-                    {product.pimage2 && <img width="400px" height="200px" src={API_URL + '/' + product.pimage2} alt="" />}
-                    <h5> Product Details : </h5>
-                    {product.pdesc}
+            {/* Info and contact */}
+            <div className="product-info">
+              <h3>Rs. {product.price} /-</h3>
+              <p>{product.pname} | {product.category}</p>
+              <p className="text-success">{product.pdesc}</p>
+
+              <h4>Product Description:</h4>
+              <p>{product.pdesc}</p>
+
+              {showContact && user ? (
+                <div className="contact-box">
+                  <h4>{user.username}</h4>
+                  <p>{user.mobile}</p>
+                  <p>{user.email}</p>
                 </div>
-                <div>
-                    <h3 className="m-2 price-text"> Rs. {product.price} /- </h3>
-                    <p className="m-2"> {product.pname}  | {product.category} </p>
-                    <p className="m-2 text-success"> {product.pdesc} </p>
-                    {user && user.username && <h4>{user.username}</h4>}
-                    {user && user.mobile && <h3>{user.mobile}</h3>}
-                    {user && user.email && <h6>{user.email}</h6>}
-
-                    {product.addedBy &&
-                        <button onClick={() => handleContact(product.addedBy)}>
-                            SHOW CONTACT DETAILS
-                        </button>}
-                   
-
-                </div>
-            </div>}
-        </div>
+              ) : (
+                product.addedBy && (
+                  <button onClick={() => handleContact(product.addedBy)}>
+                    SHOW CONTACT DETAILS
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </>
-
-    )
+  );
 }
 
 export default ProductDetail;

@@ -1,0 +1,98 @@
+/* Make the wrapper center-aligned and responsive */
+/* .myproducts-wrapper {
+  max-width: 0px;
+  margin: 100px auto 40px auto; 
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+} */
+
+/* Sticky Header Fix */
+/* .header-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #fff;
+} */
+
+/* Table Title */
+.myproducts-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1e293b;
+  text-align: center;
+}
+
+/* Table Header Row */
+.myproducts-table-header,
+.myproducts-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Table Header Styling */
+.myproducts-table-header {
+  background-color: #f3f4f6;
+  font-weight: bold;
+  color: #374151;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+/* Table Row Styling */
+.myproducts-row {
+  background-color: #f9fafb;
+}
+
+/* Product Info Cell */
+.my-product-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.my-product-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.my-product-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.my-product-desc {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.myproducts-container {
+  padding: 0 24px; /* adjust this to match other page sections */
+  margin-top: 20px;
+}
+
+/* Buttons */
+.edit-btn,
+.delete-btn {
+  background-color: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  margin-right: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.delete-btn {
+  background-color: #ef4444;
+}

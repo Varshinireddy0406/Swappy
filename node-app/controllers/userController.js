@@ -1,65 +1,66 @@
 const mongoose = require('mongoose');
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 const Users = mongoose.model('Users', {
-    username: String,
-    mobile: String,
-    email: String,
-    password: String,
-    likedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Products' }] ,
-    cart : [{type: mongoose.Schema.Types.ObjectId , ref: 'Products'}]
+  username: String,
+  mobile: String,
+  email: String,
+  password: String,
+  likedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Products' }],
+  cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Products' }]
 });
 
-module.exports.likeProducts = (req, res) => {
-    let productId = req.body.productId;
-    let userId = req.body.userId;
+// 🔐 Signup
+module.exports.signup = async (req, res) => {
+  const { username, password, email, mobile } = req.body;
+  try {
+    const user = new Users({ username, password, email, mobile });
+    await user.save();
+    res.send({ message: 'Signup successful.' });
+  } catch {
+    res.status(500).send({ message: 'Server error during signup.' });
+  }
+};
 
-    Users.updateOne({ _id: userId }, { $addToSet: { likedProducts: productId } })
-        .then(() => {
-            res.send({ message: 'liked success.' })
-        })
-        .catch(() => {
-            res.send({ message: 'server err' })
-        })
+// 🔐 Login
+module.exports.login = async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await Users.findOne({ username });
+    if (!user) return res.send({ message: 'User not found.' });
+    if (user.password !== password) return res.send({ message: 'Incorrect password.' });
 
-}
+    const token = jwt.sign({ data: user }, 'MYKEY', { expiresIn: '1h' });
+    res.send({ message: 'Login successful.', token, userId: user._id });
+  } catch {
+    res.status(500).send({ message: 'Server error during login.' });
+  }
+};
 
-module.exports.signup = (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-    const email = req.body.email;
-    const mobile = req.body.mobile;
-    const user = new Users({ username: username, password: password, email, mobile });
-    user.save()
-        .then(() => {
-            res.send({ message: 'saved success.' })
-        })
-        .catch(() => {
-            res.send({ message: 'server err' })
-        })
+// 👤 Get Profile by ID
+module.exports.myProfileById = async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    if (!user) return res.status(404).send({ message: 'User not found' });
+    res.send({
+      message: 'success',
+      user: { username: user.username, email: user.email, mobile: user.mobile }
+    });
+  } catch {
+    res.status(500).send({ message: 'Server error fetching profile' });
+  }
+};
 
-}
-
-module.exports.myProfileById = (req, res) => {
-    let uid = req.params.userId
-
-    Users.findOne({ _id: uid })
-        .then((result) => {
-            res.send({
-                message: 'success.', user: {
-                    email: result.email,
-                    mobile: result.mobile,
-                    username: result.username
-                }
-            })
-        })
-        .catch(() => {
-            res.send({ message: 'server err' })
-        })
-
-    return;
-
-}
+// 👤 Get User (POST)
+// module.exports.getUserById = async (req, res) => {
+//   try {
+//     const user = await Users.findById(req.body.id);
+//     if (!user) return res.status(404).send({ message: 'User not found' });
+//     res.send({ message: 'success', user });
+//   } catch {
+//     res.status(500).send({ message: 'Server error fetching user' });
+//   }
+// };
 
 module.exports.getUserById = (req, res) => {
     const _userId = req.params.uId;
@@ -78,78 +79,92 @@ module.exports.getUserById = (req, res) => {
         })
 }
 
+module.exports.getUser = (req, res) => {
+  const userId = req.body.id;
 
-module.exports.login = (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+  if (!userId) {
+    return res.status(400).send({ message: "User ID missing" });
+  }
 
-    Users.findOne({ username: username })
-        .then((result) => {
-            if (!result) {
-                res.send({ message: 'user not found.' })
-            } else {
-                if (result.password == password) {
-                    const token = jwt.sign({
-                        data: result
-                    }, 'MYKEY', { expiresIn: '1h' });
-                    res.send({ message: 'find success.', token: token, userId: result._id })
-                }
-                if (result.password != password) {
-                    res.send({ message: 'password wrong.' })
-                }
+  Users.findById(userId)
+    .then((user) => {
+      if (!user) return res.status(404).send({ message: "User not found" });
+      res.send({ message: "success", user });
+    })
+    .catch((err) => {
+      console.error("❌ Error fetching user:", err);
+      res.status(500).send({ message: "server err" });
+    });
+};
 
-            }
 
-        })
-        .catch(() => {
-            res.send({ message: 'server err' })
-        })
 
-}
+// ❤️ Like a product
+module.exports.likeProduct = async (req, res) => {
+  const { userId, productId } = req.body;
+  try {
+    await Users.updateOne({ _id: userId }, { $addToSet: { likedProducts: productId } });
+    res.send({ message: 'Product liked successfully' });
+  } catch {
+    res.status(500).send({ message: 'Server error while liking' });
+  }
+};
 
-module.exports.likedProducts = (req, res) => {
+// 💔 Unlike a product
+module.exports.unlikeProduct = async (req, res) => {
+  const { userId, productId } = req.body;
+  try {
+    await Users.updateOne({ _id: userId }, { $pull: { likedProducts: productId } });
+    res.send({ message: 'Product unliked successfully' });
+  } catch {
+    res.status(500).send({ message: 'Server error while unliking' });
+  }
+};
 
-    Users.findOne({ _id: req.body.userId }).populate('likedProducts')
-        .then((result) => {
-            res.send({ message: 'success', products: result.likedProducts })
-        })
-        .catch((err) => {
-            res.send({ message: 'server err' })
-        })
+// ⭐ Get all liked products
+module.exports.likedProducts = async (req, res) => {
+  try {
+    const user = await Users.findById(req.body.userId).populate('likedProducts');
+    if (!user) return res.status(404).send({ message: 'User not found' });
+    res.send({ message: 'success', products: user.likedProducts });
+  } catch {
+    res.status(500).send({ message: 'Server error fetching liked products' });
+  }
+};
 
-}
+// 🛒 Add to cart
+module.exports.addToCart = async (req, res) => {
+  const { userId, productId } = req.body;
+  try {
+    await Users.updateOne({ _id: userId }, { $addToSet: { cart: productId } });
+    res.send({ message: 'Added to cart successfully.' });
+  } catch {
+    res.status(500).send({ message: 'Server error adding to cart.' });
+  }
+};
 
-module.exports.addToCart = async(req,res) =>{
-    console.log(req.body, "123")
-
-    const isUpdate =await Users.updateOne({_id :req.body.userId}, 
-       {
-        $addToSet: {cart: req.body.productId}
-       }
-    )
-
-    if(isUpdate){
-        return res.send({ code: 200, message: 'Added to cart successfully.'})
-    }else{
-        return res.send({ code: 500, message: 'Server Err.'})
-    }
-
-    return  res.send('add')
-
-}
-
+// 🛒 Get cart
 module.exports.getCart = async (req, res) => {
-     const userId = req.body.userId
+  try {
+    const user = await Users.findById(req.body.userId).populate('cart');
+    if (!user) return res.status(404).send({ message: 'User not found' });
+    res.send({ code: 200, message: 'Get cart success.', data: user });
+  } catch {
+    res.status(500).send({ message: 'Server error fetching cart.' });
+  }
+};
 
-     const data =await Users.findOne({ _id: userId }).populate('cart')
-
-     if (data){
-        return res.send({ code: 200, message: 'Get cart success.', data: data })
-    }else{
-        return res.send({ code: 500, message: 'Server Err.'})
+// 🗑️ Remove from cart
+module.exports.removeFromCart = async (req, res) => {
+  const { userId, productId } = req.body;
+  try {
+    const result = await Users.updateOne({ _id: userId }, { $pull: { cart: productId } });
+    if (result.modifiedCount > 0) {
+      res.send({ message: 'Removed from cart' });
+    } else {
+      res.send({ message: 'Item not found in cart' });
     }
-
-     
-
-
-}
+  } catch {
+    res.status(500).send({ message: 'Server error removing from cart' });
+  }
+};

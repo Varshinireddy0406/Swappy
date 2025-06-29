@@ -1,166 +1,76 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
-import Categories from "./Categories";
-import { FaHeart } from "react-icons/fa";
-import './Home.css';
+import './MyProducts.css';
 import API_URL from "../constants";
 
-
 function MyProducts() {
+  const [products, setProducts] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
-    const navigate = useNavigate()
+  useEffect(() => {
+    const url = API_URL + '/my-products';
+    const data = { userId: localStorage.getItem('userId') };
+    axios.post(url, data)
+      .then((res) => {
+        if (res.data.products) setProducts(res.data.products);
+      })
+      .catch(() => alert('Server Error'));
+  }, [refresh]);
 
-    const [products, setproducts] = useState([]);
-    const [cproducts, setcproducts] = useState([]);
-    const [search, setsearch] = useState('');
-    const [refresh, setrefresh] = useState(false);
-    const [productId, setproductId] = useState('');
-
-    // useEffect(() => {
-    //     if (!localStorage.getItem('token')) {
-    //         navigate('/login')
-    //     }
-    // }, [])
-
-    useEffect(() => {
-        const url = API_URL + '/my-products';
-        let data = { userId: localStorage.getItem('userId') }
-        axios.post(url, data)
-            .then((res) => {
-                if (res.data.products) {
-                    setproducts(res.data.products);
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-    }, [refresh])
-
-    const handlesearch = (value) => {
-        setsearch(value);
-    }
-
-    const handleClick = () => {
-        let filteredProducts = products.filter((item) => {
-            if (item.pname.toLowerCase().includes(search.toLowerCase()) ||
-                item.pdesc.toLowerCase().includes(search.toLowerCase()) ||
-                item.category.toLowerCase().includes(search.toLowerCase())) {
-                return item;
-            }
-        })
-        setcproducts(filteredProducts)
-
-    }
-
-    const handleCategory = (value) => {
-        let filteredProducts = products.filter((item, index) => {
-            if (item.category == value) {
-                return item;
-            }
-        })
-        setcproducts(filteredProducts)
-    }
-
-    const handleLike = (productId) => {
-        let userId = localStorage.getItem('userId');
-
-        const url = API_URL + '/like-product';
-        const data = { userId, productId }
-        axios.post(url, data)
-            .then((res) => {
-                if (res.data.message) {
-                    alert('Liked.')
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-
-    }
-
-    const handleDel = (pid) =>{
-        console.log(pid) 
-        if(!localStorage.getItem('userId')){
-            alert('Please Login First');
-            return;
+  const handleDel = (pid) => {
+    axios.post(API_URL + '/delete-product', {
+      pid,
+      userId: localStorage.getItem('userId')
+    })
+      .then((res) => {
+        if (res.data.message) {
+          alert("Deleted successfully");
+          setRefresh(!refresh);
         }
-        const url = API_URL  + '/delete-product';
-        const data ={
-              pid, 
-              userId: localStorage.getItem('userId' )
-            
-            }
+      })
+      .catch(() => alert("Server Error"));
+  };
 
-        axios.post(url, data) 
-        .then((res) => {
-            if (res.data.message) {
-                alert('Delete Success.')
-                setrefresh(!refresh)
-            }
-        })
-        .catch((err) => {
-            alert('Server Err.')
-        })
+  return (
+    <>
+      <Header />
+      
+      <div className="myproducts-container">
+        <h2 className="myproducts-title">My Products</h2>
 
-    }
-
-    return (
-        <div>
-            <Header search={search} handlesearch={handlesearch} handleClick={handleClick} />
-            <Categories handleCategory={handleCategory} />
-
-            <div className="d-flex justify-content-center flex-wrap">
-                {cproducts && products.length > 0 &&
-                    cproducts.map((item, index) => {
-
-                        return (
-                            <div key={item._id} className="card m-3 ">
-                                <div onClick={() => handleLike(item._id)} className="icon-con">
-                                    <FaHeart className="icons" />
-                                </div>
-                                <img width="300px" height="200px" src={API_URL + '/' + item.pimage} />
-
-                                <p className="m-2"> {item.pname}  | {item.category} </p>
-                                <h3 className="m-2 text-danger"> {item.price} </h3>
-                                <p className="m-2 text-success"> {item.pdesc} </p>
-                            </div>
-                        )
-
-                    })}
-            </div>
-
-            <h5> MY PRODUCTS  </h5> 
-
-            <div className="d-flex justify-content-center flex-wrap">
-                {products && products.length > 0 &&
-                    products.map((item, index) => {
-
-                        return (
-                            <div key={item._id} className="card m-3 ">
-                                <div onClick={() => handleLike(item._id)} className="icon-con">
-                                    <FaHeart className="icons" />
-                                </div>
-                                <img width="300px" height="200px" src={API_URL + '/' + item.pimage} />
-                                <p className="m-2"> {item.pname}  | {item.category} </p>
-                                <h3 className="m-2 text-danger"> {item.price} </h3>
-                                <p className="m-2 text-success"> {item.pdesc} </p>
-                                <p className="m-2 text-success"> 
-                                <Link to={`/edit-product/${item._id}`}><button className="logout-btn"> EDIT PRODUCT  </button> </Link>
-                                 </p>
-
-                                <button onClick={() =>handleDel(item._id)}>DELETE PRODUCT </button>
-                            </div>
-                        )
-
-                    })}
-            </div>
-
-
-
+        <div className="myproducts-table-header">
+          <div className="my-col product-col">Product</div>
+          <div className="my-col cat-col">Category</div>
+          <div className="my-col price-col">Price</div>
+          <div className="my-col action-col">Actions</div>
         </div>
-    )
+
+        {products.map((item) => (
+          <div className="myproducts-row" key={item._id}>
+            <div className="my-col product-col">
+              <div className="my-product-info">
+                <img src={API_URL + '/' + item.pimage} alt={item.pname} className="my-product-img" />
+                <div>
+                  <div className="my-product-name">{item.pname}</div>
+                  <div className="my-product-desc">{item.pdesc}</div>
+                </div>
+              </div>
+            </div>
+            <div className="my-col cat-col">{item.category}</div>
+            <div className="my-col price-col">Rs. {item.price}</div>
+            <div className="my-col action-col">
+              <Link to={`/edit-product/${item._id}`}>
+                <button className="edit-btn">Edit</button>
+              </Link>
+              <button className="delete-btn" onClick={() => handleDel(item._id)}>Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
 }
 
 export default MyProducts;

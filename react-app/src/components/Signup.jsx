@@ -1,65 +1,82 @@
 import { Link } from "react-router-dom";
-import Header from "./Header";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_URL from "../constants";
+import './Signup.css';
+//import logo from "../assets/swappy-logo.png'; // use same logo as log
 
 function Signup() {
+    const navigate = useNavigate();
+  const [username, setusername] = useState('');
+  const [password, setpassword] = useState('');
+  const [email, setemail] = useState('');
+  const [mobile, setmobile] = useState('');
 
-    const [username, setusername] = useState('');
-    const [password, setpassword] = useState('');
-    const [email, setemail] = useState('');
-    const [mobile, setmobile] = useState('');
+  const handleApi = () => {
+    const url = API_URL + '/signup';
+    const data = { username, password, mobile, email };
+    axios.post(url, data)
+      .then((res) => {
+        if (res.data.message) {
+          alert('✅ Signed up successfully!');
+           navigate('/'); 
+        }
+      })
+      .catch(() => {
+        alert('SERVER ERROR');
+      });
+  };
 
+  return (
+    <div className="signup-page">
+      <div className="swappy-logo-text">
+  swa<span className="highlight">ppy</span>
+</div>
 
-    const handleApi = () => {
-        const url = API_URL + '/signup';
-        const data = { username, password, mobile, email };
-        axios.post(url, data)
-            .then((res) => {
-                if (res.data.message) {
-                    alert(res.data.message);
-                }
-            })
-            .catch((err) => {
-                alert('SERVER ERR')
-            })
-    }
-    return (
-        <div>
-            <Header />
-            <div className="p-3 m-3">
-                <h3> Welcome to Signup Page </h3>
-                <br></br>
-                USERNAME
-                <input className="form-control" type="text" value={username}
-                    onChange={(e) => {
-                        setusername(e.target.value)
-                    }} />
-                <br></br>
-                MOBILE
-                <input className="form-control" type="text" value={mobile}
-                    onChange={(e) => {
-                        setmobile(e.target.value)
-                    }} />
-                <br></br>
-                EMAIL
-                <input className="form-control" type="text" value={email}
-                    onChange={(e) => {
-                        setemail(e.target.value)
-                    }} />
-                <br></br>
-                PASSWORD
-                <input className="form-control" type="text" value={password}
-                    onChange={(e) => {
-                        setpassword(e.target.value)
-                    }} />
-                <br></br>
-                <button className="btn btn-primary mr-3" onClick={handleApi}> SIGNUP </button>
-                <Link className="m-3" to="/login">  LOGIN </Link>
-            </div>
-        </div>
-    )
+      <div className="signup-card">
+        <h2>Sign Up</h2>
+
+        <label>Username</label>
+        <input
+          type="text"
+          className="signup-input"
+          value={username}
+          onChange={(e) => setusername(e.target.value)}
+        />
+
+        <label>Mobile</label>
+        <input
+          type="text"
+          className="signup-input"
+          value={mobile}
+          onChange={(e) => setmobile(e.target.value)}
+        />
+
+        <label>Email</label>
+        <input
+          type="text"
+          className="signup-input"
+          value={email}
+          onChange={(e) => setemail(e.target.value)}
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          className="signup-input"
+          value={password}
+          onChange={(e) => setpassword(e.target.value)}
+        />
+
+        <button className="signup-btn" onClick={handleApi}>Sign up</button>
+
+        <p className="signup-footer">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default Signup;

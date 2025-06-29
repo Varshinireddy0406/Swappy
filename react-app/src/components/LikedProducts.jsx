@@ -1,138 +1,85 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
-import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import Categories from "./Categories";
-import { FaHeart } from "react-icons/fa";
-import './Home.css';
+import { FaTimes } from "react-icons/fa";
 import API_URL from "../constants";
-
+import './LikedProducts.css';
 
 function LikedProducts() {
+  const [products, setProducts] = useState([]);
 
-    const navigate = useNavigate()
+  const fetchLikedProducts = () => {
+    const userId = localStorage.getItem('userId');
+    axios.post(API_URL + '/liked-products', { userId })
+      .then(res => {
+        if (res.data.products) {
+          setProducts(res.data.products);
+        }
+      })
+      .catch(() => alert("Server Error"));
+  };
 
-    const [products, setproducts] = useState([]);
-    const [cproducts, setcproducts] = useState([]);
-    const [search, setsearch] = useState('');
+  useEffect(() => {
+    fetchLikedProducts();
+  }, []);
 
-    // useEffect(() => {
-    //     if (!localStorage.getItem('token')) {
-    //         navigate('/login')
-    //     }
-    // }, [])
+  const handleRemove = (productId) => {
+    const userId = localStorage.getItem('userId');
+    axios.post(API_URL + '/unlike-product', { userId, productId })
+      .then(() => {
+        setProducts(prev => prev.filter(p => p._id !== productId));
+      })
+      .catch(() => alert("Remove failed"));
+  };
 
-    useEffect(() => {
-        const url = API_URL + '/liked-products';
-        let data = { userId: localStorage.getItem('userId') }
-        axios.post(url, data)
-            .then((res) => {
-                if (res.data.products) {
-                    setproducts(res.data.products);
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-    }, [])
+  const moveToCart = (productId) => {
+    const userId = localStorage.getItem('userId');
+    axios.post(API_URL + '/add-to-cart', { userId, productId })
+      .then((res) => {
+        if (res.data.message) {
+          setProducts(prev => prev.filter(p => p._id !== productId));
+          alert("Moved to cart successfully!");
+        }
+      })
+      .catch(() => alert("Add to cart failed"));
+  };
 
-    const handlesearch = (value) => {
-        setsearch(value);
-    }
+  return (
+    <>
+      <Header />
+      <div className="wishlist-wrapper">
+        <h2 className="wishlist-title">My Wishlist</h2>
+        <div className="wishlist-grid">
+          {products.map(item => (
+            <div className="wishlist-card" key={item._id}>
+              <button className="wishlist-remove" title="Remove from Wishlist" onClick={() => handleRemove(item._id)}>
+                <FaTimes />
+              </button>
 
-    const handleClick = () => {
-        let filteredProducts = products.filter((item) => {
-            if (item.pname.toLowerCase().includes(search.toLowerCase()) ||
-                item.pdesc.toLowerCase().includes(search.toLowerCase()) ||
-                item.category.toLowerCase().includes(search.toLowerCase())) {
-                return item;
-            }
-        })
-        setcproducts(filteredProducts)
-
-    }
-
-    const handleCategory = (value) => {
-        let filteredProducts = products.filter((item, index) => {
-            if (item.category == value) {
-                return item;
-            }
-        })
-        setcproducts(filteredProducts)
-    }
-
-    const handleLike = (productId) => {
-        let userId = localStorage.getItem('userId');
-
-        const url = API_URL + '/like-product';
-        const data = { userId, productId }
-        axios.post(url, data)
-            .then((res) => {
-                if (res.data.message) {
-                    alert('Liked.')
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-
-    }
-
-
-    return (
-        <div>
-            <Header search={search} handlesearch={handlesearch} handleClick={handleClick} />
-            <Categories handleCategory={handleCategory} />
-            <h5> LIKED PRODUCTS </h5>
-            <div className="d-flex justify-content-center flex-wrap">
-                {cproducts && products.length > 0 &&
-                    cproducts.map((item, index) => {
-
-                        return (
-                            <div key={item._id} className="card m-3 ">
-                                <div onClick={() => handleLike(item._id)} className="icon-con">
-                                    <FaHeart className="icons" />
-                                </div>
-                                <img width="300px" height="200px" src={API_URL + '/' + item.pimage} />
-
-                                <p className="m-2"> {item.pname}  | {item.category} </p>
-                                <h3 className="m-2 text-danger"> {item.price} </h3>
-                                <p className="m-2 text-success"> {item.pdesc} </p>
-                               
-                            </div>
-                        )
-                        
-
-                    })}
+              <img src={API_URL + '/' + item.pimage} alt={item.pname} />
+              <div className="wishlist-info">
+                <div className="wishlist-name">{item.pname}</div>
+                <div className="wishlist-price">
+                  Rs.{item.price}
+                  {item.oldPrice && (
+                    <>
+                      <span className="wishlist-old">Rs.{item.oldPrice}</span>
+                      <span className="wishlist-discount">
+                        ({Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)}% OFF)
+                      </span>
+                    </>
+                  )}
+                </div>
+                <button onClick={() => moveToCart(item._id)} className="wishlist-move">
+                  MOVE TO CART
+                </button>
+              </div>
             </div>
-           
-
-            {/* <h5> ALL RESULTS  </h5> */}
-
-            <div className="d-flex justify-content-center flex-wrap">
-                {products && products.length > 0 &&
-                    products.map((item, index) => {
-
-                        return (
-                            <div key={item._id} className="card m-3 ">
-                                <div onClick={() => handleLike(item._id)} className="icon-con">
-                                    <FaHeart className="icons" />
-                                </div>
-                                <img width="300px" height="200px" src={API_URL + '/' + item.pimage} />
-                                <p className="m-2"> {item.pname}  | {item.category} </p>
-                                <h3 > Rs.{item.price} </h3>
-                                <p className="m-2 text-success"> {item.pdesc} </p> 
-                                {/* <button> wishlist </button> */}
-                            </div>
-                        )
-
-                    })}
-            </div>
-
-
-
+          ))}
         </div>
-    )
+      </div>
+    </>
+  );
 }
 
 export default LikedProducts;

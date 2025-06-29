@@ -1,158 +1,174 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
-import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import Categories from "./Categories";
-import { FaHeart } from "react-icons/fa";
-import './Home.css';
 import API_URL from "../constants";
+import './UserCart.css';
 
+function UserCart() {
+  const [data, setData] = useState([]);
 
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
+  const fetchCart = () => {
+    const url = API_URL + '/get-user-cart';
+    const data = { userId: localStorage.getItem('userId') };
+    axios.post(url, data)
+      .then((res) => {
+        setData(res.data.data.cart);
+      })
+      .catch(() => {
+        alert('Server Error');
+      });
+  };
 
+  // const handleRemove = (productId) => {
+  //   const url = API_URL + '/remove-from-cart';
+  //   const dataToSend = {
+  //     userId: localStorage.getItem('userId'),
+  //     productId: productId
+  //   };
 
-function UserCart(){
-    const navigate = useNavigate()
+  //   axios.post(url, dataToSend)
+  //     .then((res) => {
+  //       if (res.data.message === "Removed") {
+  //         fetchCart(); // Refresh cart
+  //       }
+  //     })
+  //     .catch(() => {
+  //       alert('Remove failed');
+  //     });
+  // };
+  const handleRemove = async (productId) => {
+  try {
+    const res = await axios.post(API_URL + '/remove-from-cart', {
+      userId: localStorage.getItem('userId'),
+      productId
+    });
 
-    const [products, setproducts] = useState([]);
-    const [cproducts, setcproducts] = useState([]);
-    const [search, setsearch] = useState('');
-    const [data, setData] = useState('');
-    
-
-    useEffect(() => {
-
-      
-        const url = API_URL + '/get-user-cart';
-        let data = { userId: localStorage.getItem('userId') }
-        axios.post(url, data)
-            .then((res) => {
-               console.log(res.data, "30")
-               console.log(res.data.data.cart)
-               setData(res.data.data.cart)
-              
-            })
-            .catch(err => {
-                alert('Server Err.', err)
-            })
-    }, [] )
-
-    const handlesearch = (value) => {
-        setsearch(value);
+    if (res.data.success === true || res.data.message?.toLowerCase() === "removed") {
+      setData(prev => prev.filter(item => item._id !== productId));
+    } else {
+      alert(res.data.message || "Could not remove item.");
     }
+  } catch (err) {
+    alert("Remove failed");
+    console.error("❌ Frontend Remove Error:", err);
+  }
+};
 
-    const handleClick = () => {
-        let filteredProducts = products.filter((item) => {
-            if (item.pname.toLowerCase().includes(search.toLowerCase()) ||
-                item.pdesc.toLowerCase().includes(search.toLowerCase()) ||
-                item.category.toLowerCase().includes(search.toLowerCase())) {
-                return item;
-            }
-        })
-        setcproducts(filteredProducts)
+  const handleCheckout = async () => {
+  const amount = data.reduce((sum, i) => sum + parseInt(i.price), 0);
+  const { order } = (await axios.post(`${API_URL}/create-order`, { amount })).data;
 
+  const options = {
+    key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+    amount: order.amount,
+    currency: order.currency,
+    name: "Swappy",
+    description: "Cart Payment",
+    order_id: order.id,
+    // handler: async (response) => {
+    //   alert(`Payment successful: ${response.razorpay_payment_id}`);
+    //   // TODO: verify payment & store order server‑side
+    // },
+    handler: async function (response) {
+  alert("✅ Payment successful!\nPayment ID: " + response.razorpay_payment_id);
+
+  try {
+    const verifyRes = await axios.post(`${API_URL}/verify-payment`, {
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_signature: response.razorpay_signature,
+      cartItems: data, // Optional: send purchased products
+      userId: localStorage.getItem("userId")
+    });
+
+    if (verifyRes.data.success) {
+      alert("🎉 Payment Verified & Order Stored!");
+    } else {
+      alert("⚠️ Payment verification failed.");
     }
+  } catch (err) {
+    alert("❌ Server Error during verification.");
+    console.error(err);
+  }
+},
 
-    const handleCategory = (value) => {
-        let filteredProducts = products.filter((item, index) => {
-            if (item.category == value) {
-                return item;
-            }
-        })
-        setcproducts(filteredProducts)
-    }
+     method: {
+        upi: true,       // ✅ Show UPI (with QR Code inside)
+        card: true,
+        netbanking: true
+      },
+    prefill: { name: "User", email: "user@example.com" },
+    theme: { color: "#3399cc" }
+  };
 
-    const handleLike = (productId) => {
-        let userId = localStorage.getItem('userId');
-
-        const url = API_URL + '/like-product';
-        const data = { userId, productId }
-        axios.post(url, data)
-            .then((res) => {
-                if (res.data.message) {
-                    alert('Liked.')
-                }
-            })
-            .catch((err) => {
-                alert('Server Err.')
-            })
-
-    }
-
-    return(
-        <div>
-            <Header search={search} handlesearch={handlesearch} handleClick={handleClick} />
-            <Categories handleCategory={handleCategory} />
-            {/* <h5> SEARCH RESULTS </h5>
-            <div className="d-flex justify-content-center flex-wrap">
-                {cproducts && products.length > 0 &&
-                    cproducts.map((item, index) => {
-
-                        return (
-                            <div key={item._id} className="card m-3 ">
-                                <div onClick={() => handleLike(item._id)} className="icon-con">
-                                    <FaHeart className="icons" />
-                                </div>
-                                <img width="300px" height="200px" src={API_URL + '/' + item.pimage} />
-
-                                <p className="m-2"> {item.pname}  | {item.category} </p>
-                                <h3 className="m-2 text-danger"> {item.price} </h3>
-                                <p className="m-2 text-success"> {item.pdesc} </p>
-                            </div>
-                        )
-
-                    })}
-            </div> */}
+  const rzp = new window.Razorpay(options);
+  rzp.open();
+};
 
 
-            <h5> MY CART PRODUCTS  </h5>
+  return (
+    <div>
+      <Header />
 
-            <div className="d-flex justify-content-center flex-wrap">
-                {products && products.length > 0 &&
-                    products.map((item, index) => {
+      <div className="cart-container">
+        <h2 className="cart-heading">Shopping Cart</h2>
 
-                        return (
-                            <div key={item._id} className="card m-3 ">
-                                <div onClick={() => handleLike(item._id)} className="icon-con">
-                                    <FaHeart className="icons" />
-                                </div>
-                                <img width="300px" height="200px" src={API_URL + '/' + item.pimage} />
-                                <p className="m-2"> {item.pname}  | {item.category} </p>
-                                <h3 className="m-2 text-danger"> {item.price} </h3>
-                                <p className="m-2 text-success"> {item.pdesc} </p>
-                            </div>
+        <table className="cart-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data && data.length > 0 && data.map((item) => (
+              <tr key={item._id}>
+                <td className="product-info">
+                  <img
+                    src={API_URL + '/' + item.pimage}
+                    alt={item.pname}
+                    className="product-img"
+                  />
+                  <div>
+                    <div className="product-name">{item.pname}</div>
+                    <div className="product-desc">{item.pdesc}</div>
+                  </div>
+                </td>
+                <td>Rs. {item.price}</td>
+                <td>Rs. {item.price}</td>
+                <td>
+                  <button className="remove-btn" onClick={() => handleRemove(item._id)}>
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
+        {data.length > 0 && (
+          <div className="cart-footer">
+            <span className="subtotal-label">Subtotal</span>
+            <span className="subtotal-value">
+              Rs. {data.reduce((total, item) => total + parseInt(item.price), 0)}
+            </span>
+          </div>
+        )}
 
-                        )
-
-                    })}
-            </div>
-
-            <div>
-                {
-                    data && data.length>0 && 
-                    data.map((item,index) => {
-                        return (
-                            <div key={item._id} className="card m-3 ">
-                            {/* <div onClick={() => handleLike(item._id)} className="icon-con">
-                                <FaHeart className="icons" />
-                            </div> */}
-                            <img width="300px" height="200px" src={API_URL + '/' + item.pimage} />
-                            <p className="m-2"> {item.pname}  | {item.category} </p>
-                            <h3 className="m-2 text-danger"> {item.price} </h3>
-                            <p className="m-2 text-success"> {item.pdesc} </p>
-                        </div>
-                           
-                        )
-
-                    })
-                }
-            </div>
-
-        </div>
-    )
-
+        {data.length > 0 && (
+          <div className="checkout-btn-container">
+            <button className="checkout-btn" onClick={handleCheckout}>Continue to Checkout</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
-
 
 export default UserCart;

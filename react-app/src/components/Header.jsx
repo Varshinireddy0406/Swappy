@@ -1,156 +1,98 @@
 import { Link, useNavigate } from 'react-router-dom';
-import './Header.css'
-import { FaSearch } from "react-icons/fa";
+import './Header.css';
+import { FaSearch, FaShoppingCart, FaPlus, FaUserCircle } from "react-icons/fa";
 import { useState } from 'react';
 
 function Header(props) {
+  const [showOver, setShowOver] = useState(false);
+  const navigate = useNavigate();
 
-    const [loc, setLoc] = useState(null)
-    const [showOver, setshowOver] = useState(false)
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    navigate('/login');
+  };
 
-    const navigate = useNavigate()
+  const categories = [
+    "All Categories", "Mattresses", "Quilts and covers", "Dustbin", "Foot-mats",
+    "Bathing products", "Books", "Electronics", "Broomstick and Dustpan", "Bed"
+  ];
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        navigate('/login');
-    }
+  return (
+    <>
+      {/* Main Header */}
+      <div className="header-bar">
+        <Link to="/" className="logo-text">
+          swa<span className="highlight">ppy</span>
+        </Link>
 
-    // let locations = [
-    //     {
-    //         "latitude": 28.6139,
-    //         "longitude": 77.2090,
-    //         "placeName": "New Delhi, Delhi"
-    //     },
-    //     {
-    //         "latitude": 19.0760,
-    //         "longitude": 72.8777,
-    //         "placeName": "Mumbai, Maharashtra"
-    //     },
-    // ]
-
-    return (
-        <div className='header-container d-flex justify-content-between'>
-
-             <div className="header">
-                <Link className='links' to="/">  HOME </Link>
-
-                
-
-                {/* <select value={loc} onChange={(e) => {
-                    localStorage.setItem('userLoc', e.target.value)
-                    setLoc(e.target.value)
-                }} >
-                    {
-                        locations.map((item, index) => {
-                            return (
-                                <option value={`${item.latitude},${item.longitude}`} >
-                                    {item.placeName}
-                                </option>
-                            )
-                        })
-                    }
-                </select>  */}
-                <input className='search'
-                    type='text'
-                    value={props && props.search}
-                    onChange={(e) => props.handlesearch && props.handlesearch(e.target.value)
-                    }
-                />
-                <button className='search-btn' onClick={() => props.handleClick && props.handleClick()} > <FaSearch /> </button>
-                 
-                
-            </div>
-            {/* <h1>  varsha </h1> */}
-{/*   
-            <input className='search'
-                    type='text'
-                    value={props && props.search}
-                    onChange={(e) => props.handlesearch && props.handlesearch(e.target.value)
-                    }
-                />
-                <button className='search-btn' onClick={() => props.handleClick && props.handleClick()} > <FaSearch /> </button> */}
-            <div>
-
-                <div
-                    onClick={() => {
-                        setshowOver(!showOver)
-                    }}
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        background: '#002f34',
-                        width: '40px',
-                        height: '40px',
-                        color: ' #7e8e9a',
-                        fontSize: '14px',
-                        borderRadius: '50%'
-                    }} >  P </div>
-
-                    
-
-                    
-
-                {showOver && <div style={{
-                    minHeight: '100px',
-                    width: '200px',
-                    background: ' #7e8e9a',
-                    position: 'absolute',
-                    top: '0',
-                    right: '0',
-                    zIndex: 1,
-                    marginTop: '50px',
-                    marginRight: '50px',
-                    color: ' #7e8e9a',
-                    fontSize: '14px',
-                    background: ' #90a4ae',
-                    borderRadius: '7px'
-                }}>
-
-<div>
-                        {!!localStorage.getItem('token') &&
-                            <Link to="/my-profile">
-                                <button className="logout-btn"> PROFILE </button>
-                            </Link>}
-                    </div>
-                    
-                    <div>
-                        {!!localStorage.getItem('token') &&
-                            <Link to="/add-product">
-                                <button className="logout-btn">ADD PRODUCT  </button>
-                            </Link>}
-                    </div>
-                    <div>
-                        {!!localStorage.getItem('token') &&
-                            <Link to="/liked-products">
-                                <button className="logout-btn"> FAVOURITES  </button>
-                            </Link>}
-                    </div>
-                    <div>
-                        {!!localStorage.getItem('token') &&
-                            <Link to="/my-products">
-                                <button className="logout-btn">MY PRODUCTS  </button>
-                            </Link>}
-                    </div>
-                    <div>
-                        {!!localStorage.getItem('token') &&
-                            <Link to="/user-cart">
-                                <button className="logout-btn"> CART  </button>
-                            </Link>}
-                    </div>
-                    <div>
-                        {!localStorage.getItem('token') ?
-                            <Link to="/login">  LOGIN </Link> :
-                            <button className='logout-btn' onClick={handleLogout}> LOGOUT </button>}
-                    </div>
-
-                </div>}
-            </div>
-
+        <div className="search-wrapper">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search for products, brands and more"
+            value={props?.search}
+            onChange={(e) => props?.handlesearch?.(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") props?.handleClick?.();
+            }}
+          />
         </div>
-    )
-}
 
+        <div className="actions-area">
+          <div className="icon-btn" onClick={() => setShowOver(!showOver)}>
+            <FaUserCircle size={22} />
+            <span>Login</span>
+          </div>
+
+          <Link to="/user-cart" className="icon-btn">
+            <FaShoppingCart size={20} />
+            <span>Cart</span>
+          </Link>
+
+          <Link to="/add-product" className="icon-btn">
+            <FaPlus size={18} />
+            <span>Sell</span>
+          </Link>
+
+          {showOver && (
+            <div className="dropdown-box">
+              {!!localStorage.getItem('token') && (
+                <>
+                  <Link to="/my-profile"><button>Profile</button></Link>
+                  <Link to="/liked-products"><button>Favourites</button></Link>
+                  <Link to="/my-products"><button>My Products</button></Link>
+                  <Link to="/my-orders"><button>My Orders</button></Link>
+
+                </>
+              )}
+              <div>
+                {!localStorage.getItem('token') ? (
+                  <Link to="/login"><button>Login</button></Link>
+                ) : (
+                  <button onClick={handleLogout}>Logout</button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Category Bar */}
+     <div className="category-strip">
+  {[
+    "All Categories", "Mattresses", "Quilts and covers", "Dustbin",
+    "Foot-mats", "Bathing products", "Books", "Electronics",
+    "Broomstick and Dustpan", "Bed"
+  ].map((cat, i) => (
+    <button key={i} onClick={() => props?.handleCategory?.(cat)}>
+      {cat}
+    </button>
+  ))}
+</div>
+
+    </>
+  );
+}
 
 export default Header;

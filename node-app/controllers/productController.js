@@ -11,6 +11,7 @@ let schema = new mongoose.Schema({
     pimage2: String,
     addedBy: mongoose.Schema.Types.ObjectId,
     
+    
 })
 
 schema.index({ pLoc: '2dsphere' });

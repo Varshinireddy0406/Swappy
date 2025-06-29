@@ -1,0 +1,75 @@
+.swappy-logo-text {
+  font-size: 36px;
+  font-weight: bold;
+  color: #1e293b; /* navy blue for 'swa' */
+  font-family: 'Poppins', sans-serif;
+}
+
+.swappy-logo-text .highlight {
+  color: #f59e0b; /* orange for 'ppy' */
+}
+
+
+.signup-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  padding: 0 20px;
+  flex-wrap: wrap;
+}
+
+.signup-logo img {
+  width: 160px;
+}
+
+.signup-card {
+  background-color: white;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+}
+
+.signup-card h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #1e293b;
+}
+
+.signup-input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  margin-bottom: 20px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.signup-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #1e3a8a;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.signup-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.signup-footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+}

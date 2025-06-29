@@ -1,46 +1,133 @@
-.icons {
-    font-size: 32px;
-    height: 32px;
-    width: 32px;
-    color: #ddd;
-    cursor: pointer;
+/* General */
+body {
+  background-color: #f1faff;
+  font-family: "Segoe UI", sans-serif;
 }
 
-.icons:hover {
-    color: red;
+.card {
+  width: 260px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 10px;
+  position: relative;
+  background-color: white;
+  transition: transform 0.2s ease;
 }
 
-.icon-con {
-    position: absolute;
-    top: 0;
-    right: 0;
-    border-radius: 50%;
-    padding: 7px;
-    background-color: #fff;
-    margin: 7px;
+.card:hover {
+  transform: scale(1.03);
+  cursor: pointer;
 }
 
-.links {
-    text-decoration: none;
-    font-size: 24px;
-    color: #002f34;
-    font-weight: bold;
+.card img {
+  border-radius: 10px 10px 0 0;
+  object-fit: cover;
 }
 
 .price-text {
-    color: #002f34;
-
+  color: #1c3f6e;
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
+.card p {
+  margin: 0;
+  padding: 0;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.card .text-success {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: green;
+}
+
+button {
+  width: 90%;
+  margin: 10px auto;
+  display: block;
+  padding: 0.5rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:enabled {
+  background-color: #007bff;
+  color: white;
+}
+
+button:disabled {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.icon-con {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+
+.icons {
+  font-size: 22px;
+  color: #ccc; /* default gray */
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.icons.liked {
+  color: #f43f5e; /* pink when liked */
+}
+
+
 .clear-btn {
-    height: 24px;
-    background-color: #002f34;
-    color: #fff;
-    border-radius: 4px;
-    font-size: 12px;
-    outline: none;
-    border: none;
-    padding: 0px 15px;
-    margin-top: 10px;
-    margin-left: 10px;
+  margin-left: 10px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  border: none;
+  background-color: #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Product grid */
+.d-flex {
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+}
+
+/* Responsive behavior */
+@media screen and (max-width: 768px) {
+  .card {
+    width: 90%;
+    margin: 1rem auto;
+  }
+
+  .d-flex {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+table {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+td, th {
+  text-align: center;
+  vertical-align: middle;
 }

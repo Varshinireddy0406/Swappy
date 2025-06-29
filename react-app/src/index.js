@@ -18,6 +18,7 @@ import MyProducts from './components/MyProducts';
 import MyProfile from './components/MyProfile';
 import EditProduct from './components/EditProduct';
 import UserCart from './components/UserCart';
+import MyOrders from './components/MyOrders';
 
 
 const router = createBrowserRouter([
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
   {
     path: "/user-cart",
     element: (<UserCart />),
+  },
+  {
+    path: "/my-orders",
+    element: (<MyOrders />),
   },
 ]);
 
